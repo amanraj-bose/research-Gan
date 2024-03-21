@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from typing import Literal
 import matplotlib.pyplot as plt
-
+import tensorflow_addons as tfa
 
 class UnZip(object):
     def __init__(self) -> None:
@@ -78,8 +78,9 @@ class DataLoader(object):
         kernel_shif_range=[5, 9, 11]
         np.random.shuffle(kernel_shif_range)
         r = self._read(r)
-        x = tf.image.convert_image_dtype(r, tf.float32).numpy()
-        x = cv2.GaussianBlur(x, (kernel_shif_range[0], kernel_shif_range[0]), sigmaX=sigma)
+        x = tf.image.convert_image_dtype(r, tf.float32)
+        x = tf.cast(x, tf.float32)#.numpy()
+        x = tfa.image.gaussian_filter2d(x, (kernel_shif_range[0], kernel_shif_range[0]), sigma=sigma)
         x = tf.cast(x, tf.uint8)
         return x, r
     
@@ -102,8 +103,8 @@ class DataLoader(object):
         np.random.shuffle(noise)
         np.random.shuffle(kernel_shif_range)
         r = self._read(z)
-        x = tf.image.convert_image_dtype(r, tf.float32).numpy()
-        x = cv2.GaussianBlur(x, (kernel_shif_range[0], kernel_shif_range[0]), sigmaX=sigma)
+        x = tf.image.convert_image_dtype(r, tf.float32)#.numpy()
+        x = tfa.image.gaussian_filter2d(x, (kernel_shif_range[0], kernel_shif_range[0]), sigma=sigma)
         x = tf.cast(x, tf.uint8)
         x = tf.cast(x, tf.float32)/255.
         x = x + noise[0] * tf.random.normal(x.shape)
