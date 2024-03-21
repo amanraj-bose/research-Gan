@@ -1,0 +1,15 @@
+{  
+    "initialize":{
+        "mean": 0.0,
+        "std": 0.02
+    },
+    "generator":{
+        "denoiser": {
+            "layers": 5,
+            "channels": 3
+        },
+        "output": {
+            "channels": 3
+        }
+    }
+}
