@@ -47,21 +47,21 @@ class DataLoader(object):
     
     def join(self, x):
         x = os.path.join(self.path, x)
-        return x
+        return str(x)
 
     def _split(self) -> dict:
         x = os.listdir(self.path)
         np.random.shuffle(x) 
-        spilited = len(x)*self.split
+        spilited = int(len(x)*self.split)
         train_files, test_files = map(self.join, x[spilited:]), map(self.join, x[:spilited])
         return dict(
-            ("train", list(train_files)),
-            ("test", list(test_files))
+            [("train", list(train_files)),
+            ("test", list(test_files))]
         )
     
-    def _read(self, file):
-        read = tf.io.read_file(file)
-        read = tf.io.decode_image(read, self.channels)
+    def _read(self, x):
+        read = tf.io.read_file(x)
+        read = tf.io.decode_image(read, self.channels, expand_animations=False)
         read = tf.image.resize(read, self.size) 
 
         return read
@@ -116,19 +116,20 @@ class DataLoader(object):
     def load(self, imageType:Literal["noisy", "blur", "mixed", "all"]="all") -> tf.Tensor:
         spilited = self._split()
         train, test = spilited["train"], spilited["test"]
-        train_dataset = tf.data.Dataset.from_tensor_slices((train)).batch(self.batch).shuffle(self.shuffle)
-        test_dataset = tf.data.Dataset.from_tensor_slices((test)).batch(self.batch).shuffle(self.shuffle)
+        train_dataset = tf.data.Dataset.from_tensor_slices(train)
+        test_dataset = tf.data.Dataset.from_tensor_slices(test)
 
         if imageType == "noisy":types = self._noise
         elif imageType == "blur":types = self._blur
         elif imageType == "mixed":types = self._imp
         else:
             types = [self._noise, self._blur, self._imp]
-            types = np.random.shuffle(types)[0]
+            np.random.shuffle(types)
+            types = types[0]
         
         train_dataset, test_dataset = train_dataset.map(types).map(self._preprocess), test_dataset.map(types).map(self._preprocess)
 
-        return (train_dataset, test_dataset)
+        return (train_dataset.batch(self.batch).shuffle(self.shuffle), test_dataset.batch(self.batch).shuffle(self.shuffle))
 
 if __name__ == '__main__':    
     data = DataLoader(".")
