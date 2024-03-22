@@ -100,12 +100,12 @@ class MLP(Layer):
         self.linear = Dense(units, kernel_initializer=tf.random_normal_initializer(0., STD), use_bias=False)
         self.dropout = dropout
         self.rate = rate
-    
+        self.act = ACTIVATION()
     def call(self, x) -> tf.Tensor:
         x = self.linear(x)
         if self.dropout:
             x = tf.nn.dropout(x, self.rate)
-        x = ACTIVATION()(x)
+        x = self.act(x)
 
         return x
 
