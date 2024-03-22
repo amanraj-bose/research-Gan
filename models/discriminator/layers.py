@@ -74,14 +74,15 @@ class ChannelWiseAttention(Layer):
     def call(self, x) -> tf.Tensor:
         inputs = x
         # print(f"\033[1;35m{inputs.shape}\033[0m")
-        inputs = self.GlobalAverage(inputs)
+        #inputs = self.GlobalAverage(inputs)
         a = nn.leaky_relu(self.Average(x), 0.2)
         a = nn.tanh(self.Linear1(a))
         b = nn.leaky_relu(self.MaxPool(x), 0.2)
         b = self.Linear2(b)
         x = a + b
         # print(f"\033[1;35m{x.shape}\033[0m")
-        return x*inputs
+
+        return x
 
 # Spatial-Wise Attention
 class SpatialWiseAttention(Layer):
@@ -89,18 +90,20 @@ class SpatialWiseAttention(Layer):
         super(SpatialWiseAttention, self).__init__()
         self.Average = AveragePooling2D()
         self.Max = MaxPooling2D()
+        self.Max2 = MaxPooling2D()
         self.Convolve = Conv2D(filters, (7, 7), padding=padding, use_bias=use_bias, kernel_initializer=init)
         self.GlobalAverage = GlobalAveragePooling2D()
     
     def call(self, x) -> tf.Tensor:
         inputs = x
-        inputs = self.GlobalAverage(inputs)
+        #inputs = self.GlobalAverage(inputs)
         x_avg = self.Average(x)
         x_max = self.Max(x)
         x = tf.concat([x_avg, x_max], -1)
         x = self.Convolve(x)
         x = nn.leaky_relu(x, 0.2)
-        return x#*inputs
+        inputs = self.Max2(inputs)
+        return x*inputs
     
 # Channel-Spatial Wise Attention
 class ChannelSpatialAttention(Layer):
