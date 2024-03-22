@@ -38,7 +38,9 @@ class Train:
             self.optG.apply_gradients(zip(generator_gradient, self.Generator.trainable_variables))
             self.optD.apply_gradients(zip(discriminator_gradient, self.Discriminator.trainable_variables))
         
-        return ((gen_output, input, target), (total_loss.numpy(), loss.numpy(), perceptual.numpy()))
+        return ((gen_output, input, target), (tf.convert_to_tensor(total_loss, tf.float32), 
+                                              tf.convert_to_tensor(loss, tf.float32), 
+                                              tf.convert_to_tensor(perceptual, tf.float32)))
     
     def fit(self, train_ds, test_ds, epochs:int=1, rate:int=1000):
         steps:int = int(epochs*rate)
