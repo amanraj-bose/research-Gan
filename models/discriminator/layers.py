@@ -100,7 +100,7 @@ class SpatialWiseAttention(Layer):
         x = tf.concat([x_avg, x_max], -1)
         x = self.Convolve(x)
         x = nn.leaky_relu(x, 0.2)
-        return x*inputs
+        return x#*inputs
     
 # Channel-Spatial Wise Attention
 class ChannelSpatialAttention(Layer):
