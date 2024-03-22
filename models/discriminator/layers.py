@@ -52,7 +52,7 @@ class SEBlock(Layer):
         x = nn.tanh(x)
         # this line for showing thing
         # print(x.shape, x.shape[-1])
-        if x.shape[-2] is None:
+        if x.shape[0] is None:
           x = tf.reshape(x, (1, 1, shape[-1]))
         else:
           x = tf.reshape(x, (x.shape[-2], 1, 1, shape[-1])) # -1
