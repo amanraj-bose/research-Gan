@@ -22,7 +22,7 @@ class Visualize(object):
     def __init__(self, figsize:tuple) -> None:
         self.figsize:tuple = figsize
     
-    def visual(self, images:list, title:list|None=None, index:int=0):
+    def visual(self, images:list, title:list|None=None, index:int=-1):
         figure = plt.figure(figsize=self.figsize)
         for idx, (i, j) in enumerate(zip(images, title), 1):
             figure.add_subplot(1, 3, idx)
