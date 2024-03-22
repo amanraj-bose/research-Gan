@@ -49,4 +49,4 @@ class DiscriminatorLoss(Loss):
             y_pred
         )
         total_loss = x + y
-        return total_loss
+        return total_loss*0.5
