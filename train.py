@@ -12,11 +12,11 @@ from .models import (
 from keras.models import Model
 
 class Train:
-    def __init__(self,  input_shape:tuple, *, generatorOpt:Optimizer, discriminatorOpt:Optimizer, lambdas:int=100, from_logits:bool=True) -> None:
+    def __init__(self,  input_shape:tuple, *, generatorOpt:Optimizer, discriminatorOpt:Optimizer, denoised_perm:bool=True, lambdas:int=100, from_logits:bool=True) -> None:
         super(Train, self).__init__()
         self.optG = generatorOpt
         self.optD = discriminatorOpt
-        self.Generator:Model = Generator(input_shape)
+        self.Generator:Model = Generator(input_shape, denoised_perm=denoised_perm)
         self.Discriminator:Model = Discriminator(input_shape)
         self.GANLoss = AdversialLoss(input_shape, lambdas, from_logits).loss
         self.DiscLoss = DiscriminatorLoss(from_logits)
