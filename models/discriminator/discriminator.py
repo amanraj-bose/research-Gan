@@ -6,9 +6,8 @@ from keras.layers import (
     LeakyReLU,
     Input,
     Dense,
-    ZeroPadding2D,
     Concatenate,
-    Flatten
+    GlobalAveragePooling2D
 )
 
 from .layers import (
@@ -41,7 +40,7 @@ def Discriminator(shape:tuple) -> Model:
     truth = PipeLine(input_truth)
 
     # Distance Measurement
-    distance = Concatenate()([truth, predicted])
+    distance = EuclideanDistance()([truth, predicted])
 
     # Extend Block Mechanism
     x = CNNBLock(256, (4, 4))(distance)
@@ -64,13 +63,15 @@ def Discriminator(shape:tuple) -> Model:
     x_SE_2= ChannelSpatialAttention(64, 64)(x)
     x = CNNBLock(64, (4, 4))(x_SE_2)
     x = BatchNormalization()(x)
-    x = ZeroPadding2D()(x)
     x = Conv2D(128, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
     x = BatchNormalization()(x)
-    x = ZeroPadding2D()(x)
 
     # Output Block
-    x = Conv2D(1, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
+    x = Conv2D(64, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, LeakyReLU(0.2))(x)
+    x = Dense(512, LeakyReLU(0.2))(x)
+    x = Dense(1, "sigmoid")
 
     return Model([input_truth, input_predicted], x)
 
