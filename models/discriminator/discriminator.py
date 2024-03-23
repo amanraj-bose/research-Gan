@@ -71,7 +71,7 @@ def Discriminator(shape:tuple) -> Model:
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, LeakyReLU(0.2))(x)
     x = Dense(512, LeakyReLU(0.2))(x)
-    x = Dense(1, "sigmoid")
+    x = Dense(1, "sigmoid")(x)
 
     return Model([input_truth, input_predicted], x)
 
