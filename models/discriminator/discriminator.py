@@ -40,7 +40,7 @@ def Discriminator(shape:tuple) -> Model:
     truth = PipeLine(input_truth)
 
     # Distance Measurement
-    distance = EuclideanDistance()([truth, predicted])
+    distance = Concatenate()([truth, predicted])
 
     # Extend Block Mechanism
     x = CNNBLock(256, (4, 4))(distance)
