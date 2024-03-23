@@ -7,13 +7,23 @@ from keras.layers import (
     MaxPooling2D,
     Activation, 
     PReLU,  
+    Activation
 )
 from keras.layers import Layer
 from keras.models import Sequential
 
 
 STD = 0.02
-ACTIVATION = PReLU
+
+class LeakyReLU(Activation):
+    def __init__(self, alpha=0.2) -> None:
+        super(LeakyReLU, self).__init__("leaky_relu")
+        self.alpha = alpha
+    
+    def call(self, x) -> tf.Tensor:
+        return tf.nn.leaky_relu(x, self.alpha)
+
+ACTIVATION = LeakyReLU
 
 class ConvBNReLU(Layer):
     def __init__(self, filters:int, k_size, activation, strides:tuple=(1, 1), padding:str="valid", use_bias:bool=False, norm:bool=False) -> None:
@@ -73,7 +83,7 @@ class EncoderBlock(Layer):
         self.downsample = Sequential()
         self.downsample.add(Conv2D(filters, k_size, strides=1, padding="same", kernel_initializer=kernel_init, use_bias=False))
         if norm:
-            self.downsample.add(BatchNormalization())
+            self.downsample.add(PixelNormalization2D())
         self.downsample.add(ACTIVATION())
         self.downsample.add(MaxPooling2D())
     
