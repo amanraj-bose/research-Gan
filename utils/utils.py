@@ -26,7 +26,7 @@ class Visualize(object):
         figure = plt.figure(figsize=self.figsize)
         for idx, (i, j) in enumerate(zip(images, title), 1):
             figure.add_subplot(1, 3, idx)
-            plt.imshow(i[index]*0.5+0.5)
+            plt.imshow((i[index]*0.5)+0.5)
             plt.axis(False)
             plt.title(str(j), fontsize=10)
         plt.show()
