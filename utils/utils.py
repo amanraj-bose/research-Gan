@@ -68,9 +68,9 @@ class DataLoader(object):
     
     def _preprocess(self, x, y):
         x = tf.cast(x, tf.float32)
-        l = lambda z: tf.cast((z/127.5) - 1, tf.float32) if self.range[0] == -1 else tf.cast(z/255., tf.float32)
-        x = l(x)
-        y = l(y)
+        # l = lambda z: tf.cast((z/127.5) - 1, tf.float32) if self.range[0] == -1 else tf.cast(z/255., tf.float32)
+        x = (x/127.5)-1
+        y = (x/127.5)-1
         return x, y
     
     def _blur(self, r) -> tf.Tensor:
