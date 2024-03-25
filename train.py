@@ -64,6 +64,6 @@ class Train:
             #print(f"Step : {(step//rate) + 1}K")
 
             images, losses = self.train_step(input, target)
-            if step%250 == 0:
+            if step%10 == 0:
                 self.visualize.visual(list(images), ["Generated", "Input", "Target"], -1)
                 print({i:j.numpy() for i,j in zip(["Total GAN Loss", "GAN Loss", "Perceptual Loss"], list(losses))})
