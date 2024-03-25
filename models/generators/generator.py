@@ -47,8 +47,9 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
         MLP(256, False),
         MLP(256, False),
         MLP(256, False),
-        MLP(256, True, 0.3),
-        MLP(256, True, 0.1),
+        PixelNormalization2D(),
+        MLP(256, False),
+        MLP(256, False),
         MLP(256, False)
     ], name="W-Noise")(input)
 
