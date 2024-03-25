@@ -33,11 +33,11 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
     
     # Encoder Block
     encoder_1 = EncoderBlock(512, (4, 4), init)(denoised)
-    encoder_2 = EncoderBlock(512, (4, 4), init, True)(encoder_1)
+    encoder_2 = EncoderBlock(512, (4, 4), init, False)(encoder_1)
     encoder_3 = EncoderBlock(256, (4, 4), init, True)(encoder_2)
-    encoder_4 = EncoderBlock(128, (4, 4), init, False)(encoder_3)
-    encoder_5 = EncoderBlock(128, (4, 4), init, False)(encoder_4)
-    encoder_6 = EncoderBlock(64, (4, 4), init, True)(encoder_5)
+    encoder_4 = EncoderBlock(128, (4, 4), init, True)(encoder_3)
+    encoder_5 = EncoderBlock(128, (4, 4), init, True)(encoder_4)
+    encoder_6 = EncoderBlock(64, (4, 4), init, False)(encoder_5)
     encoder_7 = EncoderBlock(32, (4, 4), init, False)(encoder_6)
     encoder_out = Conv2D(16, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU())(encoder_7)
 
