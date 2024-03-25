@@ -26,7 +26,7 @@ from keras.utils import plot_model
 
 def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoised_perm:bool=False) -> Model:
     input = Input(inputs)
-    init = tf.random_normal_initializer(0., 0.02)
+    init = tf.random_normal_initializer(0., 0.035)
     denoised = input
     if denoised_perm:
         denoised = DenoiseConvolution2D(channels_in, dlayers)(input)
