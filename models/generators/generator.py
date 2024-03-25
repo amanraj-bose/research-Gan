@@ -32,14 +32,14 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
         denoised = DenoiseConvolution2D(channels_in, dlayers)(input)
     
     # Encoder Block
-    encoder_1 = EncoderBlock(512, (4, 4), init)(denoised)
-    encoder_2 = EncoderBlock(512, (4, 4), init, False)(encoder_1)
-    encoder_3 = EncoderBlock(256, (4, 4), init, True)(encoder_2)
-    encoder_4 = EncoderBlock(128, (4, 4), init, True)(encoder_3)
-    encoder_5 = EncoderBlock(128, (4, 4), init, True)(encoder_4)
-    encoder_6 = EncoderBlock(64, (4, 4), init, False)(encoder_5)
-    encoder_7 = EncoderBlock(32, (4, 4), init, False)(encoder_6)
-    encoder_out = Conv2D(16, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU())(encoder_7)
+    encoder_1 = EncoderBlock(512, (5, 5), init)(denoised)
+    encoder_2 = EncoderBlock(512, (3, 3), init, False)(encoder_1)
+    encoder_3 = EncoderBlock(256, (3, 3), init, True)(encoder_2)
+    encoder_4 = EncoderBlock(128, (3, 3), init, True)(encoder_3)
+    encoder_5 = EncoderBlock(128, (3, 3), init, True)(encoder_4)
+    encoder_6 = EncoderBlock(64, (3, 3), init, False)(encoder_5)
+    encoder_7 = EncoderBlock(32, (3, 3), init, False)(encoder_6)
+    encoder_out = Conv2D(16, (3, 3), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU())(encoder_7)
 
     # MLPs
     W_affine_transform = Sequential([
@@ -54,42 +54,42 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
     ], name="W-Noise")(input)
 
     # Decoder Block - 1
-    decoder_1 = DecoderBlock(256, (4, 4), init, False)(encoder_out)
+    decoder_1 = DecoderBlock(256, (3, 3), init, False)(encoder_out)
     AdaIN_1 = AdaIN()(content=decoder_1, style=W_affine_transform)
 
     # Decoder Block - 2
-    decoder_2 = DecoderBlock(256, (4, 4), init, False)(AdaIN_1)
+    decoder_2 = DecoderBlock(256, (3, 3), init, False)(AdaIN_1)
     AdaIN_2 = AdaIN()(content=decoder_2, style=W_affine_transform)
-    InConvolution_1 = Conv2D(128, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_2)
+    InConvolution_1 = Conv2D(128, (1, 1), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_2)
     Concatenate_1 = Concatenate()([InConvolution_1, encoder_5])
     # Decoder Block - 3
-    decoder_3 = DecoderBlock(256, (4, 4), init, False)(Concatenate_1)
+    decoder_3 = DecoderBlock(256, (3, 3), init, False)(Concatenate_1)
     AdaIN_3 = AdaIN()(content=decoder_3, style=W_affine_transform)
-    InConvolution_2 = Conv2D(128, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_3)
+    InConvolution_2 = Conv2D(128, (1, 1), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_3)
     Concatenate_2 = Concatenate()([InConvolution_2, encoder_4])
 
     # Decoder Block - 4 
-    decoder_4 = DecoderBlock(256, (4, 4), init, False)(Concatenate_2)
+    decoder_4 = DecoderBlock(256, (3, 3), init, False)(Concatenate_2)
     AdaIN_4 = AdaIN()(content=decoder_4, style=W_affine_transform)
     Concatenate_3 = Concatenate()([AdaIN_4, encoder_3])
 
     # Decoder Block - 5
-    decoder_5 = DecoderBlock(256, (4, 4), init, False)(Concatenate_3)
+    decoder_5 = DecoderBlock(256, (3,3), init, False)(Concatenate_3)
     AdaIN_5 = AdaIN()(content=decoder_5, style=W_affine_transform)
-    InConvolution_4 = Conv2D(512, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_5)
+    InConvolution_4 = Conv2D(512, (1, 1), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_5)
     Concatenate_4 = Concatenate()([InConvolution_4, encoder_2])
 
     # Decoder Block - 6
-    decoder_6 = DecoderBlock(256, (4, 4), init, False)(Concatenate_4)
+    decoder_6 = DecoderBlock(256, (3, 3), init, False)(Concatenate_4)
     AdaIN_6 = AdaIN()(content=decoder_6, style=W_affine_transform)
-    InConvolution_5 = Conv2D(512, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_6)
+    InConvolution_5 = Conv2D(512, (1, 1), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_6)
     Concatenate_5 = Concatenate()([InConvolution_5, encoder_1])
 
     # Top of Decoder
-    decoder_7 = DecoderBlock(512, (4, 4), init)(Concatenate_5)
+    decoder_7 = DecoderBlock(512, (3, 3), init)(Concatenate_5)
 
     # Output
-    x = Conv2D(out, (4, 4), padding="same", activation="tanh", use_bias=True)(decoder_7)
+    x = Conv2D(out, (5, 5), padding="same", activation="tanh", use_bias=True)(decoder_7)
 
 
     return Model(input, x)
