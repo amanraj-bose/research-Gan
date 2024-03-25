@@ -89,7 +89,7 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
     decoder_7 = DecoderBlock(512, (4, 4), init)(Concatenate_5)
 
     # Output
-    x = Conv2D(out, (4, 4), padding="same", activation="tanh", use_bias=False)(decoder_7)
+    x = Conv2D(out, (4, 4), padding="same", activation="tanh", use_bias=True)(decoder_7)
 
 
     return Model(input, x)
