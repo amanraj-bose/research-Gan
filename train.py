@@ -61,7 +61,7 @@ class Train:
                         print("=", end="", flush=True)
 
             start = time.time()
-            print(f"Step : {(step//rate) + 1}K")
+            #print(f"Step : {(step//rate) + 1}K")
 
             images, losses = self.train_step(input, target)
             if step%250 == 0:
