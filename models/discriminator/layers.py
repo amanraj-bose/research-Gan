@@ -11,7 +11,7 @@ from keras.layers import (
     DepthwiseConv2D,
 )
 
-init = tf.random_normal_initializer(0., 0.02)
+init = tf.random_normal_initializer(0., 0.035)
 # Normalization Layer
 class PixelNormalization2D(Layer):
     def __init__(self, epsilon:float=1e-5) -> None:
