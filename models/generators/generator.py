@@ -57,12 +57,12 @@ def Generator(inputs:tuple, dlayers:int=5, channels_in:int=3, out:int=3, denoise
     AdaIN_1 = AdaIN()(content=decoder_1, style=W_affine_transform)
 
     # Decoder Block - 2
-    decoder_2 = DecoderBlock(256, (4, 4), init, True)(AdaIN_1)
+    decoder_2 = DecoderBlock(256, (4, 4), init, False)(AdaIN_1)
     AdaIN_2 = AdaIN()(content=decoder_2, style=W_affine_transform)
     InConvolution_1 = Conv2D(128, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_2)
     Concatenate_1 = Concatenate()([InConvolution_1, encoder_5])
     # Decoder Block - 3
-    decoder_3 = DecoderBlock(256, (4, 4), init, True)(Concatenate_1)
+    decoder_3 = DecoderBlock(256, (4, 4), init, False)(Concatenate_1)
     AdaIN_3 = AdaIN()(content=decoder_3, style=W_affine_transform)
     InConvolution_2 = Conv2D(128, (4, 4), padding="same", kernel_initializer=init, activation=LeakyReLU(), use_bias=False)(AdaIN_3)
     Concatenate_2 = Concatenate()([InConvolution_2, encoder_4])
