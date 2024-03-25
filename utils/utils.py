@@ -115,7 +115,7 @@ class DataLoader(object):
 
         return x, r
     
-    def load(self, imageType:Literal["noisy", "blur", "mixed", "all"]="all") -> tf.Tensor:
+    def load(self, imageType:Literal["noisy", "blur", "mixed", "all"]="noisy") -> tf.Tensor:
         spilited = self._split()
         train, test = spilited["train"], spilited["test"]
         train_dataset = tf.data.Dataset.from_tensor_slices(train)
