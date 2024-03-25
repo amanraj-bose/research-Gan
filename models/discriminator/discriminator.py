@@ -73,7 +73,7 @@ def Discriminator(shape:tuple) -> Model:
     x = Flatten()(x)
     x = Dense(1024, LeakyReLU(0.2), use_bias=False,kernel_initializer=init)(x)
     x = Dense(512, LeakyReLU(0.2), use_bias=False, kernel_initializer=init)(x)
-    x = Dense(1, "sigmoid", use_bias=False, kernel_initializer=init)(x)
+    x = Dense(1, "sigmoid", use_bias=True, kernel_initializer=init)(x)
 
     return Model([input_truth, input_predicted], x)
 
