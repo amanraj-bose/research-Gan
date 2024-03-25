@@ -71,9 +71,9 @@ def Discriminator(shape:tuple) -> Model:
     x = Conv2D(64, (4, 4), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
     x = GlobalAveragePooling2D()(x)
     x = Flatten()(x)
-    x = Dense(1024, LeakyReLU(0.2))(x)
-    x = Dense(512, LeakyReLU(0.2))(x)
-    x = Dense(1, "sigmoid")(x)
+    x = Dense(1024, LeakyReLU(0.2), use_bias=False)(x)
+    x = Dense(512, LeakyReLU(0.2), use_bias=False)(x)
+    x = Dense(1, "sigmoid", use_bias=False)(x)
 
     return Model([input_truth, input_predicted], x)
 
