@@ -15,7 +15,7 @@ class PerceptualLoss(Loss):
     def call(self, y_true, y_pred) -> tf.Tensor:
         true = self.pretrained_model(y_true)
         pred = self.pretrained_model(y_pred)
-        x = tf.reduce_mean(tf.abs(true - pred))
+        x = tf.reduce_mean(tf.square(true - pred))
         return x
 
 class AdversialLoss(Loss):
@@ -49,4 +49,4 @@ class DiscriminatorLoss(Loss):
             y_pred
         )
         total_loss = x + y
-        return total_loss*0.5
+        return total_loss
