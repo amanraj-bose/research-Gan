@@ -21,7 +21,7 @@ from keras.models import (
     Sequential
 )
 
-init = tf.random_normal_initializer(0.0, 0.035)
+init = tf.random_normal_initializer(0.0, 0.05)
 
 PipeLine = Sequential([
     Conv2D(256, (5, 5), padding="same", use_bias=False, kernel_initializer=init),
