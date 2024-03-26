@@ -6,7 +6,7 @@ from keras.layers import (
     Dense,
     Conv2DTranspose
 )
-from .layers import (
+from layers import (
     DenoiseConvolution2D,
     EncoderBlock,
     PixelNormalization2D,
@@ -24,18 +24,6 @@ def Generator(shape:tuple, k_size:tuple=(5, 5)) -> Model:
     inputs = Input(shape)
     init = tf.random_normal_initializer(0., 0.05)
 
-    Noisy = Sequential([
-        BatchNormalization(),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        PixelNormalization2D(1e-8)
-    ])(inputs)
-
-    Styler_1 = Dense(256, LeakyReLU(), use_bias=False, kernel_initializer=init)(Noisy)
-    Styler_2 = Dense(128, LeakyReLU(), use_bias=False, kernel_initializer=init)(Styler_1)
-    Styler_3 = Dense(64, LeakyReLU(), use_bias=False, kernel_initializer=init)(Styler_2)
-
     # Encoder Section
     Encoder_1 = EncoderBlock(64, k_size, init, True)(inputs)
     Encoder_2 = EncoderBlock(128, k_size, init)(Encoder_1)
@@ -46,15 +34,15 @@ def Generator(shape:tuple, k_size:tuple=(5, 5)) -> Model:
     Encoder_7 = EncoderBlock(512, k_size, init)(Encoder_6)
     
     # Decoder Section
-    Decoder_1 = DecoderBlock(512, k_size, init, True)(Encoder_7, Noisy, Encoder_6)
-    Decoder_2 = DecoderBlock(512, k_size, init, True)(Decoder_1, Noisy, Encoder_5)
-    Decoder_3 = DecoderBlock(512, k_size, init, True)(Decoder_2, Noisy, Encoder_4)
-    Decoder_4 = DecoderBlock(512, k_size, init, True)(Decoder_3, Noisy, Encoder_3)
+    Decoder_1 = DecoderBlock(512, k_size, init, True)(Encoder_7, None, None)
+    Decoder_2 = DecoderBlock(512, k_size, init, True)(Decoder_1, Encoder_5, None)
+    Decoder_3 = DecoderBlock(512, k_size, init, True)(Decoder_2, Encoder_4, None)
+    Decoder_4 = DecoderBlock(512, k_size, init, True)(Decoder_3, None, Encoder_3)
 
-    Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, Styler_1, Encoder_2)
-    Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, Styler_2, Encoder_1)
+    Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, None, Encoder_2)
+    Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, None, Encoder_1)
     
-    outputs = Conv2DTranspose(3, (9, 9), padding="same", use_bias=True, activation="tanh", kernel_initializer=init, strides=(2, 2))(Decoder_6)
+    outputs = Conv2DTranspose(3, (5, 5), padding="same", use_bias=True, activation="tanh", kernel_initializer=init, strides=(2, 2))(Decoder_6)
 
     return Model(inputs, outputs)
 
