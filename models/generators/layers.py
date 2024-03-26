@@ -159,7 +159,8 @@ class DecoderBlock(Layer):
     
     def call(self, x, style, encoder) -> tf.Tensor:
         x = self.Block(x)
-        x = self.adaptiveIN(content=x, style=style)
+        if style is not None:
+            x = self.adaptiveIN(content=x, style=style)
         if self.norm:
             x = self.Pixel(x)
         if encoder is not None:
