@@ -1,82 +1,46 @@
 import tensorflow as tf
-from keras.layers import (
-    BatchNormalization,
-    Conv2D,
-    LeakyReLU,
-    Input,
-    Dense,
-    Concatenate,
-    GlobalAveragePooling2D,
-    Flatten
-)
 
-from .layers import (
-    CNNBLock,
-    ChannelSpatialAttention,
-    SEBlock,
-)
 
-from keras.models import (
-    Model,
-    Sequential
-)
+def downsample(filters, size, apply_batchnorm=True):
+  initializer = tf.random_normal_initializer(0., 0.02)
 
-init = tf.random_normal_initializer(0.0, 0.05)
+  result = tf.keras.Sequential()
+  result.add(
+      tf.keras.layers.Conv2D(filters, size, strides=2, padding='same',
+                             kernel_initializer=initializer, use_bias=False))
 
-PipeLine = Sequential([
-    Conv2D(256, (5, 5), padding="same", use_bias=False, kernel_initializer=init),
-    BatchNormalization(),
-    LeakyReLU(0.2)
-])
+  if apply_batchnorm:
+    result.add(tf.keras.layers.BatchNormalization())
 
-def Discriminator(shape:tuple) -> Model:
-    input_predicted = Input(shape, name="predicted")
-    input_truth = Input(shape, name="truth")
+  result.add(tf.keras.layers.LeakyReLU(.2))
 
-    # Identification of Predicted and Truth
-    predicted = PipeLine(input_predicted)
-    truth = PipeLine(input_truth)
+  return result
 
-    # Distance Measurement
-    distance = Concatenate()([truth, predicted])
 
-    # Extend Block Mechanism
-    x = CNNBLock(256, (3, 3))(distance)
-    x = CNNBLock(256, (3, 3))(x)
-    x_SE_1= SEBlock(256)(x)
-    x = CNNBLock(256, (3, 3))(x) + x_SE_1
-    x = BatchNormalization()(x)
-    x = CNNBLock(128, (3, 3), (2, 2))(x)
+def Discriminator():
+  initializer = tf.random_normal_initializer(0., 0.02)
 
-    # Extend Block Mechanism - 2
-    x = CNNBLock(128, (3, 3))(x)
-    x = CNNBLock(128, (3, 3))(x)
-    x_SE_2= SEBlock(128)(x)
-    x = CNNBLock(128, (3, 3))(x) + x_SE_2
-    x = BatchNormalization()(x)
-    x = CNNBLock(128, (3, 3), (2, 2))(x)
+  inp = tf.keras.layers.Input(shape=[256, 256, 3], name='input_image')
+  tar = tf.keras.layers.Input(shape=[256, 256, 3], name='target_image')
 
-    # Attention Mechanism
-    x = CNNBLock(128, (3, 3))(x)
-    x = CNNBLock(64, (3, 3))(x)
-    x_SE_2= ChannelSpatialAttention(64, 64)(x)
-    x = CNNBLock(64, (3, 3))(x_SE_2)
-    x = BatchNormalization()(x)
-    x = Conv2D(128, (3, 3), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
-    x = BatchNormalization()(x)
+  x = tf.keras.layers.concatenate([inp, tar])  # (batch_size, 256, 256, channels*2)
 
-    # Output Block
-    x = Conv2D(64, (3, 3), padding="same", use_bias=False, kernel_initializer=init, activation=LeakyReLU(0.2))(x)
-    x = GlobalAveragePooling2D()(x)
-    x = Flatten()(x)
-    x = Dense(512, LeakyReLU(0.2), use_bias=False,kernel_initializer=init)(x)
-    x = Dense(128, LeakyReLU(0.2), use_bias=False, kernel_initializer=init)(x)
-    x = Dense(1, "sigmoid", use_bias=True, kernel_initializer=init)(x)
+  down1 = downsample(64, 4, False)(x)  # (batch_size, 128, 128, 64)
+  down2 = downsample(128, 4)(down1)  # (batch_size, 64, 64, 128)
+  down3 = downsample(256, 4)(down2)  # (batch_size, 32, 32, 256)
 
-    return Model([input_truth, input_predicted], x)
+  zero_pad1 = tf.keras.layers.ZeroPadding2D()(down3)  # (batch_size, 34, 34, 256)
+  conv = tf.keras.layers.Conv2D(512, 4, strides=1,
+                                kernel_initializer=initializer,
+                                use_bias=False)(zero_pad1)  # (batch_size, 31, 31, 512)
 
-if __name__ == '__main__':
-    from keras.utils import plot_model
+  batchnorm1 = tf.keras.layers.BatchNormalization()(conv)
 
-    x = Discriminator((256, 256, 3))
-    plot_model(x, show_shapes=True)
+  leaky_relu = tf.keras.layers.LeakyReLU()(batchnorm1)
+
+  zero_pad2 = tf.keras.layers.ZeroPadding2D()(leaky_relu)  # (batch_size, 33, 33, 512)
+
+  last = tf.keras.layers.Conv2D(1, 4, strides=1,
+                                kernel_initializer=initializer)(zero_pad2)  # (batch_size, 30, 30, 1)
+
+  return tf.keras.Model(inputs=[inp, tar], outputs=last)
