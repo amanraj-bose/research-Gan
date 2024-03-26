@@ -15,7 +15,7 @@ class PerceptualLoss(Loss):
     def call(self, y_true, y_pred) -> tf.Tensor:
         true = self.pretrained_model(y_true)
         pred = self.pretrained_model(y_pred)
-        x = tf.reduce_mean(tf.square(true - pred))
+        x = tf.reduce_mean(tf.abs(true - pred))
         return x
 
 class AdversialLoss(Loss):
@@ -25,8 +25,8 @@ class AdversialLoss(Loss):
         self.secondary_loss:Loss = PerceptualLoss(shape)
         self.lambdas:int = LAMBDA
     
-    def loss(self, generator_output, target) -> tf.Tensor:
-        loss = self.primary_loss(tf.ones_like(generator_output), generator_output)
+    def loss(self, disc_output, generator_output, target) -> tf.Tensor:
+        loss = self.primary_loss(tf.ones_like(disc_output), disc_output)
         perceptual = self.secondary_loss(target, generator_output)
         total_loss = loss + (self.lambdas*perceptual)
 
