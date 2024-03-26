@@ -31,7 +31,7 @@ class Train:
             disc_real = self.Discriminator([input, target], training=True)
             disc_predicted = self.Discriminator([input, gen_output], training=True)
 
-            total_loss, loss, perceptual = self.GANLoss(gen_output, target)
+            total_loss, loss, perceptual = self.GANLoss(disc_predicted, gen_output, target)
             discriminator_loss = self.DiscLoss(disc_real, disc_predicted)
 
             generator_gradient = gen_tape.gradient(total_loss, self.Generator.trainable_variables)
