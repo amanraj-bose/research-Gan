@@ -54,7 +54,7 @@ def Generator(shape:tuple, k_size:tuple=(5, 5)) -> Model:
     Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, Styler_1, Encoder_2)
     Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, Styler_2, Encoder_1)
     
-    outputs = Conv2DTranspose(3, (9, 9), padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(Decoder_6)
+    outputs = Conv2DTranspose(3, (9, 9), padding="same", use_bias=True, activation="tanh", kernel_initializer=init, strides=(2, 2))(Decoder_6)
 
     return Model(inputs, outputs)
 
