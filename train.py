@@ -12,15 +12,17 @@ from .models import (
 from keras.models import Model
 
 class Train:
-    def __init__(self,  input_shape:tuple, *, generatorOpt:Optimizer, discriminatorOpt:Optimizer, denoised_perm:bool=True, lambdas:int=100, from_logits:bool=True) -> None:
+    def __init__(self,  input_shape:tuple, k_size:tuple=(3, 3), *, generatorOpt:Optimizer, discriminatorOpt:Optimizer, denoised_perm:bool=True, lambdas:int=100, from_logits:bool=True, vrate:int=50) -> None:
         super(Train, self).__init__()
         self.optG = generatorOpt
         self.optD = discriminatorOpt
-        self.Generator:Model = Generator(input_shape, denoised_perm=denoised_perm)
+        self.perm = denoised_perm
+        self.Generator:Model = Generator(input_shape, k_size=k_size)
         self.Discriminator:Model = Discriminator(input_shape)
         self.GANLoss = AdversialLoss(input_shape, lambdas, from_logits).loss
         self.DiscLoss = DiscriminatorLoss(from_logits)
         self.visualize = Visualize((7, 7))
+        self.vrate = vrate
     
     @tf.function
     def train_step(self, input, target):
@@ -46,6 +48,7 @@ class Train:
         steps:int = int(epochs*rate)
         start = time.time()
         for step, (input, target) in train_ds.repeat().take(steps).enumerate():
+            print(f"Step : {(step//rate)+1}K")
             if step != 0:
                 if step%int(1e+4) == 0:
                     if not os.path.exists("./weights"):
@@ -57,13 +60,13 @@ class Train:
             if step%rate == 0:
                 if step != 0:
                     print(f"Time Taken Per {rate} steps: {time.time() - start:.2f}s")
-                    if (step + 1) % 10 == 0:
-                        print("=", end="", flush=True)
+            # if (step + 1) % 10 == 0:
+            #     print("=", end="", flush=True)
 
             start = time.time()
             #print(f"Step : {(step//rate) + 1}K")
 
             images, losses = self.train_step(input, target)
-            if step%10 == 0:
+            if step%self.vrate == 0:
                 self.visualize.visual(list(images), ["Generated", "Input", "Target"], -1)
                 print({i:j.numpy() for i,j in zip(["Total GAN Loss", "GAN Loss", "Perceptual Loss"], list(losses))})
