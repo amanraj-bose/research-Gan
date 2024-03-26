@@ -34,6 +34,7 @@ def Generator(shape:tuple, k_size:tuple=(5, 5)) -> Model:
 
     Styler_1 = Dense(256, LeakyReLU(), use_bias=False, kernel_initializer=init)(Noisy)
     Styler_2 = Dense(128, LeakyReLU(), use_bias=False, kernel_initializer=init)(Styler_1)
+    Styler_3 = Dense(64, LeakyReLU(), use_bias=False, kernel_initializer=init)(Styler_2)
 
     # Encoder Section
     Encoder_1 = EncoderBlock(64, k_size, init, True)(inputs)
@@ -53,9 +54,7 @@ def Generator(shape:tuple, k_size:tuple=(5, 5)) -> Model:
     Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, Styler_1, Encoder_2)
     Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, Styler_2, Encoder_1)
     
-    Decoder_7 = Conv2D(64, (9, 9), padding="same", kernel_initializer=init, use_bias=False)(Decoder_6)
-    Decoder_7 = tf.nn.depth_to_space(Decoder_7, 2)
-    Decoder_7 = tf.nn.leaky_relu(Decoder_7, 0.2)
+    Decoder_7 = DecoderBlock(64, k_size, init, False)(Decoder_6, Styler_3, None)
 
     outputs = Conv2D(3, (9, 9), padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(Decoder_7)
 
