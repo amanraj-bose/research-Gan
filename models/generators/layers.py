@@ -6,14 +6,13 @@ from keras.layers import (
     UpSampling2D,
     MaxPooling2D,
     Activation, 
-    PReLU,  
-    Activation
+    Conv2DTranspose
 )
 from keras.layers import Layer
 from keras.models import Sequential
 
 
-STD = 0.035
+STD = 0.05
 
 class LeakyReLU(Activation):
     def __init__(self, alpha=0.2) -> None:
@@ -64,7 +63,7 @@ class DenoiseConvolution2D(Layer):
         return x
     
 class PixelNormalization2D(Layer):
-    def __init__(self, epsilon:float=1e-5) -> None:
+    def __init__(self, epsilon:float=1e-8) -> None:
         super(PixelNormalization2D, self).__init__()
 
         self.epsilon = epsilon
@@ -81,17 +80,16 @@ class EncoderBlock(Layer):
     def __init__(self, filters, k_size, kernel_init, norm:bool=False) -> None:
         super(EncoderBlock, self).__init__()
         self.downsample = Sequential()
-        self.downsample.add(Conv2D(filters, k_size, strides=1, padding="same", kernel_initializer=kernel_init, use_bias=False))
+        self.downsample.add(Conv2D(filters, k_size, strides=(2, 2), padding="same", kernel_initializer=kernel_init, use_bias=False))
         if norm:
-            self.downsample.add(PixelNormalization2D())
+            self.downsample.add(PixelNormalization2D(1e-8))
         self.downsample.add(ACTIVATION())
-        self.downsample.add(MaxPooling2D())
     
     def call(self, x) -> tf.Tensor:
         return self.downsample(x)
 
 class AdaIN(Layer):
-    def __init__(self, epsilon=1e-5) -> None:
+    def __init__(self, epsilon=1e-8) -> None:
         super(AdaIN, self).__init__()
         self.epsilon = epsilon
     
@@ -119,12 +117,11 @@ class MLP(Layer):
 
         return x
 
-class DecoderBlock(Layer):
+class DecoderLayer(Layer):
     def __init__(self, filters, k_size, k_init, norm:bool=False) -> None:
-        super(DecoderBlock, self).__init__()
-        self.Upsample = Conv2D(filters, k_size, padding="same", kernel_initializer=k_init, use_bias=False)
+        super(DecoderLayer, self).__init__()
+        self.Upsample = Conv2DTranspose(filters, k_size, padding="same", kernel_initializer=k_init, use_bias=False, strides=(2, 2))
         self.preprocessor = Sequential()
-        self.preprocessor.add(UpSampling2D())
         if norm:
             self.preprocessor.add(PixelNormalization2D())
         self.preprocessor.add(ACTIVATION())
@@ -148,3 +145,23 @@ class PixelShuffler(tf.keras.layers.Layer):
         x = tf.transpose(x, [0, 1, 2, 5, 4, 3]) 
         out = tf.reshape(x, (batch_size, rh, rw, oc))
         return out
+
+
+class DecoderBlock(Layer):
+    def __init__(self, filters, k_size, k_init, norm:bool=False, epsilon:float=1e-8) -> None:
+        super(DecoderBlock, self).__init__()
+        self.filters = filters
+        self.k_size = k_size
+        self.norm = norm
+        self.Block = DecoderLayer(self.filters, self.k_size, k_init)
+        self.adaptiveIN = AdaIN(epsilon)
+        self.Pixel = PixelNormalization2D(epsilon)
+    
+    def call(self, x, style, encoder) -> tf.Tensor:
+        x = self.Block(x)
+        x = self.adaptiveIN(content=x, style=style)
+        if self.norm:
+            x = self.Pixel(x)
+        if encoder is not None:
+            x = tf.concat([x, encoder], -1)
+        return x
