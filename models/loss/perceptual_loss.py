@@ -25,8 +25,8 @@ class AdversialLoss(Loss):
         self.secondary_loss:Loss = PerceptualLoss(shape)
         self.lambdas:int = LAMBDA
     
-    def loss(self, discriminator_output, generator_output, target) -> tf.Tensor:
-        loss = self.primary_loss(tf.ones_like(discriminator_output), discriminator_output)
+    def loss(self, generator_output, target) -> tf.Tensor:
+        loss = self.primary_loss(tf.ones_like(generator_output), generator_output)
         perceptual = self.secondary_loss(target, generator_output)
         total_loss = loss + perceptual
 
