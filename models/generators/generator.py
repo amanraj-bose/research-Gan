@@ -6,7 +6,7 @@ from keras.layers import (
     Dense,
     Conv2DTranspose
 )
-from layers import (
+from .layers import (
     DenoiseConvolution2D,
     EncoderBlock,
     PixelNormalization2D,
