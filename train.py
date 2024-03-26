@@ -70,4 +70,4 @@ class Train:
             images, losses = self.train_step(input, target)
             if step%self.vrate == 0:
                 self.visualize.visual(list(images), ["Generated", "Input", "Target"], -1)
-                print({i:j.numpy() for i,j in zip(["Total GAN Loss", "GAN Loss", "Perceptual Loss"], list(losses))})
+                print({i:j.numpy() for i,j in zip(["Total GAN Loss", "GAN Loss", "Perceptual Loss"], list(losses))}, "\n")
