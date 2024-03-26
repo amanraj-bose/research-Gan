@@ -48,7 +48,8 @@ class Train:
         steps:int = int(epochs*rate)
         start = time.time()
         for step, (input, target) in train_ds.repeat().take(steps).enumerate():
-            print(f"Step : {(step//rate)+1}K")
+            if (step%rate) == 0:
+                print(f"Step : {(step//rate)+1}K")
             if step != 0:
                 if step%int(1e+4) == 0:
                     if not os.path.exists("./weights"):
