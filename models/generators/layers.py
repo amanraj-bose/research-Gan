@@ -12,7 +12,7 @@ from keras.layers import Layer
 from keras.models import Sequential
 
 
-STD = 0.05
+STD = 0.02
 
 class LeakyReLU(Activation):
     def __init__(self, alpha=0.2) -> None:
