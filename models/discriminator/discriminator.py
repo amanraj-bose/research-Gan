@@ -2,7 +2,6 @@ import tensorflow as tf
 from keras.layers import (
     BatchNormalization,
     Conv2D,
-    MaxPooling2D,
     LeakyReLU,
     Input,
     Dense,
@@ -12,11 +11,9 @@ from keras.layers import (
 )
 
 from .layers import (
-    EuclideanDistance,
     CNNBLock,
     ChannelSpatialAttention,
     SEBlock,
-    PixelNormalization2D
 )
 
 from keras.models import (
@@ -48,7 +45,8 @@ def Discriminator(shape:tuple) -> Model:
     x = CNNBLock(256, (3, 3))(x)
     x_SE_1= SEBlock(256)(x)
     x = CNNBLock(256, (3, 3))(x) + x_SE_1
-    x = MaxPooling2D()(x)
+    x = BatchNormalization()(x)
+    x = CNNBLock(128, (3, 3), (2, 2))(x)
 
     # Extend Block Mechanism - 2
     x = CNNBLock(128, (3, 3))(x)
@@ -56,7 +54,7 @@ def Discriminator(shape:tuple) -> Model:
     x_SE_2= SEBlock(128)(x)
     x = CNNBLock(128, (3, 3))(x) + x_SE_2
     x = BatchNormalization()(x)
-    x = MaxPooling2D()(x)
+    x = CNNBLock(128, (3, 3), (2, 2))(x)
 
     # Attention Mechanism
     x = CNNBLock(128, (3, 3))(x)
