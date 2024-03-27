@@ -61,8 +61,9 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
     x = tf.nn.depth_to_space(x, 2)
     x = LeakyReLU(0.2)(x)
     
-    x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
-    x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    for _ in range(4):
+       x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    
     
 
     outputs = Conv2DTranspose(3, k_size, padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(x)
