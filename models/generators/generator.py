@@ -4,7 +4,8 @@ from keras.layers import (
     Concatenate,
     Dense,
     Conv2DTranspose,
-    Dropout
+    Dropout,
+    Conv2D
 )
 from .layers import (
     DenoiseConvolution2D,
