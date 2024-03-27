@@ -31,7 +31,7 @@ def Generator(shape:tuple, k_size:tuple=(4, 4)) -> Model:
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dropout(0.5)
+        Dropout(0.2)
     ], name="styles")(inputs)
 
     # Encoder Section
@@ -44,26 +44,28 @@ def Generator(shape:tuple, k_size:tuple=(4, 4)) -> Model:
     Encoder_7 = EncoderBlock(512, k_size, init)(Encoder_6)
     
     # Decoder Section
-    Decoder_1 = DecoderBlock(512, k_size, init, True)(Encoder_7, None, None)
+    Decoder_1 = DecoderBlock(512, k_size, init, True)(Encoder_7, noise, Encoder_6)
     Decoder_2 = DecoderBlock(512, k_size, init, True)(Decoder_1, noise, Encoder_5)
     Decoder_3 = DecoderBlock(512, k_size, init, True)(Decoder_2, noise, Encoder_4)
     Decoder_4 = DecoderBlock(512, k_size, init, True)(Decoder_3, noise, Encoder_3)
 
     Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, None, Encoder_2)
 
-    Decoder_6 = Conv2DTranspose(128, (4, 4), use_bias=False, padding="same", kernel_initializer=init)(Decoder_5)
+    Decoder_6 = Conv2DTranspose(128, k_size, use_bias=False, padding="same", kernel_initializer=init)(Decoder_5)
     Decoder_6 = tf.nn.depth_to_space(Decoder_6, 2)
     Decoder_6 = LeakyReLU()(Decoder_6)
     Decoder_6 = Concatenate()([Decoder_6, Encoder_1])
 
 
-    x = Conv2DTranspose(128, (4, 4), use_bias=False, padding="same", activation=LeakyReLU(0.2), kernel_initializer=init)(Decoder_6)
+    x = Conv2DTranspose(128, k_size, use_bias=False, padding="same", activation=LeakyReLU(0.2), kernel_initializer=init)(Decoder_6)
     x = tf.nn.depth_to_space(x, 2)
     x = LeakyReLU(0.2)(x)
     
-    x = Conv2DTranspose(64, (4, 4), padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    
 
-    outputs = Conv2DTranspose(3, (4, 4), padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(x)
+    outputs = Conv2DTranspose(3, (9, 9), padding="same", use_bias=True, activation="gelu", kernel_initializer=init)(x)
 
     return Model(inputs, outputs)
 
