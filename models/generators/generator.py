@@ -57,10 +57,12 @@ def Generator(shape:tuple, k_size:tuple=(4, 4)) -> Model:
     Decoder_6 = Concatenate()([Decoder_6, Encoder_1])
 
 
-    x = Conv2DTranspose(64, (4, 4), use_bias=False, padding="same", activation=LeakyReLU(0.2), kernel_initializer=init)(Decoder_6)
+    x = Conv2DTranspose(128, (4, 4), use_bias=False, padding="same", activation=LeakyReLU(0.2), kernel_initializer=init)(Decoder_6)
     x = tf.nn.depth_to_space(x, 2)
     x = LeakyReLU(0.2)(x)
     
+    x = Conv2DTranspose(64, (4, 4), padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+
     outputs = Conv2DTranspose(3, (4, 4), padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(x)
 
     return Model(inputs, outputs)
