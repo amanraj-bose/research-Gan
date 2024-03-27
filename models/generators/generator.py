@@ -52,7 +52,7 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
 
     Decoder_5 = DecoderBlock(256, k_size, init, False)(Decoder_4, Encoder_2, None)
    
-    Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, Encoder_2, None)
+    Decoder_6 = DecoderBlock(128, k_size, init, False)(Decoder_5, Encoder_1, None)
 
 
     x = Conv2DTranspose(64, k_size, use_bias=False, padding="same", activation=LeakyReLU(0.2), kernel_initializer=init, strides=(2,2))(Decoder_6)
