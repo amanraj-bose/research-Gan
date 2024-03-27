@@ -5,7 +5,7 @@ import tensorflow as tf
 
 
 class PerceptualLoss(Loss):
-    def __init__(self, shape:tuple, output_layers:str="block3_conv4") -> None:
+    def __init__(self, shape:tuple, output_layers:str="block4_conv4") -> None:
         super(PerceptualLoss, self).__init__()
         self.vgg19 = vgg19.VGG19(False, "imagenet", input_shape=shape)
         for i in self.vgg19.layers:
