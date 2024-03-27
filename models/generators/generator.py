@@ -20,7 +20,7 @@ from keras.utils import plot_model
 
 
 
-def Generator(shape:tuple, k_size:tuple=(4, 4)) -> Model:
+def Generator(shape:tuple, k_size:tuple) -> Model:
     inputs = Input(shape)
     init = tf.random_normal_initializer(0., 0.02)
 
