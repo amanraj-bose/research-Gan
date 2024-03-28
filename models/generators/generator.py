@@ -32,7 +32,7 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
         Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dropout(0.2)
+        Dropout(0.5)
     ], name="styles")(inputs)
 
     # Encoder Section
