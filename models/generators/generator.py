@@ -13,12 +13,13 @@ from .layers import (
     PixelNormalization2D,
     LeakyReLU,
     DecoderBlock,
+    GeLU
 )
 
 from keras.models import Model, Sequential
 from keras.utils import plot_model
 
-
+act = GeLU
 
 
 def Generator(shape:tuple, k_size:tuple) -> Model:
@@ -28,10 +29,10 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
     # Sequential Noisy Blocks
     noise = Sequential([
         PixelNormalization2D(),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
-        Dense(512, LeakyReLU(), use_bias=False, kernel_initializer=init),
+        Dense(512, act(), use_bias=False, kernel_initializer=init),
+        Dense(512, act(), use_bias=False, kernel_initializer=init),
+        Dense(512, act(), use_bias=False, kernel_initializer=init),
+        Dense(512, act(), use_bias=False, kernel_initializer=init),
         Dropout(0.5)
     ], name="styles")(inputs)
 
@@ -57,14 +58,14 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
 
     x = Conv2D(64, k_size, use_bias=False, padding="same", kernel_initializer=init, strides=(1,1))(Decoder_6)
     x = tf.nn.depth_to_space(x, 2)
-    x = LeakyReLU(0.2)(x)
+    x = act(0.2)(x)
    
     #for _ in range(2):
        # x = tf.nn.depth_to_space(x, 1)
        # x = Conv2D(32, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
     
     
-    x = Conv2D(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    x = Conv2D(64, k_size, padding="same", use_bias=False, activation=act(0.2), kernel_initializer=init)(x)
 
     outputs = Conv2D(3, k_size, padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(x)
 
