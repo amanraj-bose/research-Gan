@@ -22,7 +22,17 @@ class LeakyReLU(Activation):
     def call(self, x) -> tf.Tensor:
         return tf.nn.leaky_relu(x, self.alpha)
 
-ACTIVATION = LeakyReLU
+class GeLU(Activation):
+    def __init__(self, x:float|None=None) -> None:
+        super(GeLU, self).__init__("gelu")
+       
+    def call(self, x) -> tf.Tensor:
+        return tf.nn.gelu(x)
+
+
+
+
+ACTIVATION = GeLU
 
 class ConvBNReLU(Layer):
     def __init__(self, filters:int, k_size, activation, strides:tuple=(1, 1), padding:str="valid", use_bias:bool=False, norm:bool=False) -> None:
