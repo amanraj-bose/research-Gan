@@ -64,7 +64,7 @@ def Generator(shape:tuple, k_size:tuple) -> Model:
        # x = Conv2D(32, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
     
     
-    x = Conv2DTranspose(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
+    x = Conv2D(64, k_size, padding="same", use_bias=False, activation=LeakyReLU(0.2), kernel_initializer=init)(x)
 
     outputs = Conv2D(3, k_size, padding="same", use_bias=True, activation="tanh", kernel_initializer=init)(x)
 
