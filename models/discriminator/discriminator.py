@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 def downsample(filters, size, apply_batchnorm=True):
-  initializer = tf.random_normal_initializer(0., 0.02)
+  initializer = tf.random_normal_initializer(0., 0.05)
 
   result = tf.keras.Sequential()
   result.add(
